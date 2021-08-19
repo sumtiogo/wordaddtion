@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word Addition</title>
+  <script>
+    document.addEventListener('DOMContentLoaded', init)
+    function init() {
+      document.getElementById("cal")
+        .addEventListener('click', cal)
+    }
+    function parseInput(domId) {
+      const dom = document.getElementById(domId)
+      return dom.value.split('')
+    }
+    function cal() {
+      const augend = parseInput('augend')
+      const addend = parseInput('addend')
+      const sum = parseInput('sum')
+      let ans = new Map()
+      let rev = new Map()
+
+      let output = ""
+      ans.forEach((v,k) => {output += `${k}=${v}, `})
+      output = output.substring(0, output.length - 2)
+      document.getElementById('ans').textContent =
+        JSON.stringify(output)
+    }
+  </script>
+</head>
+<body>
+<h1>覆面算</h1>
+<h2>規則</h2>
+<div>
+  <ol>
+    <li>一個字母代表一個數字</li>
+    <li>字母不同數字一定不同</li>
+    <li>最前面的數字不可以是零</li>
+  </ol>
+</div>
+<h2>範例</h2>
+<div>
+  題目 send + more = money
+  <br/>
+  解答：s=9, e=5, n=6, d=7, m=1, o=0, r=8
+</div>
+<h2>題目</h2>
+<div>
+  <input id="augend" type="text" value="send"> +
+  <input id="addend" type="text" value="more"> =
+  <input id="sum" type="text" value="money">
+</div>
+<br>
+<button id="cal">計算答案</button>
+<h2>答案：</h2>
+<div id="ans"></div>
+</body>
+</html>

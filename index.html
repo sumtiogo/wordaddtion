@@ -4,44 +4,10 @@
   <meta charset="UTF-8">
   <title>Word Addition</title>
   <style>
-      body {
-          margin-left: 30px;
-      }
+    body {
+      margin-left: 30px;
+    }
   </style>
-  <script>
-      document.addEventListener('DOMContentLoaded', init)
-      function init() {
-          document.getElementById("cal")
-              .addEventListener('click', cal)
-      }
-      function parseInput(domId) {
-          const dom = document.getElementById(domId)
-          return dom.value.split('')
-      }
-      function cal() {
-          const augend = parseInput('augend').reverse()
-          const addend = parseInput('addend').reverse()
-          const sum = parseInput('sum').reverse()
-          const chars = [...new Set(augend.concat(addend).concat(sum))]
-          const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-          let c2nMap = new Map()
-          for(const [is, cs] of sum.entries()){
-              const [cg, cd] = [augend[is], addend[is]]
-          // TODO
-          }
-
-          let output = "no answer"
-          if(chars.every(c => typeof c2nMap.get(c) === "number")) {
-              output = ""
-              c2nMap.forEach((v, k) => {
-                  output += `${k}=${v}, `
-              })
-              output = output.substring(0, output.length - 2)
-          }
-          document.getElementById('ans').textContent =
-              JSON.stringify(output)
-      }
-  </script>
 </head>
 <body>
 <h1>覆面算</h1>
@@ -55,20 +21,125 @@
 </div>
 <h2>範例</h2>
 <div>
-  題目 send + more = money
+  題目: send + more = money
   <br/>
-  解答：s=9, e=5, n=6, d=7, m=1, o=0, r=8
+  解答: s=9, e=5, n=6, d=7, m=1, o=0, r=8, y=2
 </div>
 <h2>題目</h2>
+<ol>
+  <li>deer + camp = cloud</li>
+  <li>skip + spin = bird</li>
+</ol>
 <div>
-  <input id="augend" type="text" value="send"> +
-  <input id="addend" type="text" value="more"> =
-  <input id="sum" type="text" value="money">
+  <label for="augend"></label><input id="augend" type="text" value="send"> +
+  <label for="addend"></label><input id="addend" type="text" value="more"> =
+  <label for="sum"></label><input id="sum" type="text" value="money">
 </div>
 <br>
 <button id="cal">計算答案</button>
 <h2>答案：</h2>
 <div id="ans"></div>
+
+<script>
+  document.getElementById("cal").addEventListener('click', cal)
+  function cal() {
+    let getAns = false
+    const augend = parseInput('augend')
+    const addend = parseInput('addend')
+    const sum = parseInput('sum')
+    const heads = new Set([augend[0], addend[0], sum[0]])
+    const chars = [...new Set(augend.concat(addend).concat(sum))]
+    const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
+
+    function recursive(chars, nums, c2n) {
+      if(getAns) return
+      if(chars.length === 0) {
+        if(check(augend, addend, sum, c2n)) {
+          getAns = true
+          return output(c2n, augend, addend, sum)
+        }
+      } else {
+        for(const num of nums) {
+          const char = chars[0]
+          if(num === 0 && heads.has(char)) continue
+          const c2nClone = new Map(c2n)
+          c2nClone.set(char, num)
+          recursive(
+            chars.filter(c => c !== char),
+            nums.filter(n => n !== num),
+            c2nClone,
+          )
+        }
+      }
+    }
+
+    recursive(chars, nums, new Map())
+  }
+
+  function parseInput(domId) {
+    const dom = document.getElementById(domId)
+    return dom.value.split('')
+  }
+  function output(c2n, augend, addend, sum) {
+    const ans = document.getElementById('ans')
+    function toNum(chars) {
+      return chars.map(c=>c2n.get(c)).join('')
+    }
+    if(c2n === undefined) {
+      ans.textContent = "no answer"
+    } else {
+      let output = ""
+      c2n.forEach((v, k) => {
+        output += `${k}=${v}, `
+      })
+      // get rid of last ', '
+      output = output.substring(0, output.length - 2)
+
+      output += '<br/><br/>'
+      output += `${toNum(augend)} + ${toNum(addend)} = ${toNum(sum)}`
+      ans.innerHTML = output.toString()
+    }
+  }
+
+  function check(augend, addend, sum, c2n){
+    // 最前面的數字不可以是零
+    const firstN = [
+      c2n.get(augend[0]),
+      c2n.get(addend[0]),
+      c2n.get(sum[0]),
+    ]
+    if(firstN.some(n => n === 0)) return false
+
+    // 字母不同數字一定不同
+    if([...c2n.keys()].length !== new Set(c2n.values()).size) return false
+
+    // 一個字母代表一個數字
+    const chars = [...new Set(augend.concat(addend).concat(sum))]
+    if(!chars.every(c => typeof c2n.get(c) === "number")) return false
+
+    // 數字帶入算式要成立
+    augend = [...augend].reverse()
+    addend = [...addend].reverse()
+    sum = [...sum].reverse()
+    let carry = 0
+    for(const [i, cs] of sum.entries()){
+      const [cg, cd] = [augend[i], addend[i]]
+      const [ns, ng, nd] = [c2n.get(cs), c2n.get(cg) || 0, c2n.get(cd) || 0]
+      if(ns === undefined) return false
+      const s = ng + nd + carry
+      carry = s >= 10 ? 1 : 0
+      const sMod10 = s >= 10 ? s - 10 : s
+      if(sMod10 !== ns) return false
+    }
+
+    if (carry !== 0) return false
+
+    // 都通過了
+    return true
+  }
+
+
+</script>
 </body>
 <!-- https://sumtiogo.github.io/wordaddtion/ -->
 </html>

@@ -4,33 +4,43 @@
   <meta charset="UTF-8">
   <title>Word Addition</title>
   <style>
-    body {
-        margin-left: 30px;
-    }
+      body {
+          margin-left: 30px;
+      }
   </style>
   <script>
-    document.addEventListener('DOMContentLoaded', init)
-    function init() {
-      document.getElementById("cal")
-        .addEventListener('click', cal)
-    }
-    function parseInput(domId) {
-      const dom = document.getElementById(domId)
-      return dom.value.split('')
-    }
-    function cal() {
-      const augend = parseInput('augend')
-      const addend = parseInput('addend')
-      const sum = parseInput('sum')
-      let ans = new Map()
-      let rev = new Map()
+      document.addEventListener('DOMContentLoaded', init)
+      function init() {
+          document.getElementById("cal")
+              .addEventListener('click', cal)
+      }
+      function parseInput(domId) {
+          const dom = document.getElementById(domId)
+          return dom.value.split('')
+      }
+      function cal() {
+          const augend = parseInput('augend').reverse()
+          const addend = parseInput('addend').reverse()
+          const sum = parseInput('sum').reverse()
+          const chars = [...new Set(augend.concat(addend).concat(sum))]
+          const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+          let c2nMap = new Map()
+          for(const [is, cs] of sum.entries()){
+              const [cg, cd] = [augend[is], addend[is]]
+          // TODO
+          }
 
-      let output = ""
-      ans.forEach((v,k) => {output += `${k}=${v}, `})
-      output = output.substring(0, output.length - 2)
-      document.getElementById('ans').textContent =
-        JSON.stringify(output)
-    }
+          let output = "no answer"
+          if(chars.every(c => typeof c2nMap.get(c) === "number")) {
+              output = ""
+              c2nMap.forEach((v, k) => {
+                  output += `${k}=${v}, `
+              })
+              output = output.substring(0, output.length - 2)
+          }
+          document.getElementById('ans').textContent =
+              JSON.stringify(output)
+      }
   </script>
 </head>
 <body>
@@ -60,4 +70,5 @@
 <h2>答案：</h2>
 <div id="ans"></div>
 </body>
+<!-- https://sumtiogo.github.io/wordaddtion/ -->
 </html>

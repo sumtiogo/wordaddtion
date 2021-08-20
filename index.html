@@ -50,41 +50,45 @@
   document.getElementById("cal").addEventListener('click', cal)
 
   function cal() {
-    // TODO 在 button 上顯示計算狀況
-    output('計算中...')
     augend = parseInput('augend')
     addend = parseInput('addend')
     sum = parseInput('sum')
     const heads = new Set([augend[0], addend[0], sum[0]])
     const chars = [...new Set(augend.concat(addend).concat(sum))]
-    const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
-    // let user see "計算中" for better UX
-    setTimeout(()=>{
-      let ans = undefined;
-      solve(chars, nums, new Map())
-      output(ans)
+    // add randomness so that we may get different feasible solution
+    const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => (Math.random() - 0.5))
 
-      function solve(chars, nums, c2n) {
-        if(ans !== undefined) return
-        if(chars.length === 0) {
-          if(check(c2n)) {
-            ans = c2n
-          }
-        } else {
-          for(const num of nums) {
-            const char = chars[0]
-            if(num === 0 && heads.has(char)) continue
-            const c2nClone = new Map(c2n)
-            c2nClone.set(char, num)
-            solve(
-              chars.filter(c => c !== char),
-              nums.filter(n => n !== num),
-              c2nClone,
-            )
+    // let user see "計算中" for better UX
+    output('計算中...')
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        // We use two requestAnimationFrame to ensure browser painting output before we solve
+        let ans = undefined;
+        solve(chars, nums, new Map())
+        output(ans)
+
+        function solve(chars, nums, c2n) {
+          if(ans !== undefined) return
+          if(chars.length === 0) {
+            if(check(c2n)) {
+              ans = c2n
+            }
+          } else {
+            for(const num of nums) {
+              const char = chars[0]
+              if(num === 0 && heads.has(char)) continue
+              const c2nClone = new Map(c2n)
+              c2nClone.set(char, num)
+              solve(
+                chars.filter(c => c !== char),
+                nums.filter(n => n !== num),
+                c2nClone,
+              )
+            }
           }
         }
-      }
-    }, 100)
+      })
+    })
   }
 
   function parseInput(domId) {

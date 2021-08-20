@@ -45,44 +45,46 @@
   let augend = parseInput('augend')
   let addend = parseInput('addend')
   let sum = parseInput('sum')
-  output(new Map(Object.entries({s:9, e:5, n:6, d:7, m:1, o:0, r:8, y:2})), augend, addend, sum)
+  output(new Map(Object.entries({s:9, e:5, n:6, d:7, m:1, o:0, r:8, y:2})))
 
   document.getElementById("cal").addEventListener('click', cal)
 
   function cal() {
     // TODO 在 button 上顯示計算狀況
-    console.log('計算中...')
+    output('計算中...')
     augend = parseInput('augend')
     addend = parseInput('addend')
     sum = parseInput('sum')
     const heads = new Set([augend[0], addend[0], sum[0]])
     const chars = [...new Set(augend.concat(addend).concat(sum))]
     const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
-    let ans = undefined;
-    solve(chars, nums, new Map())
-    output(ans)
-    console.log('計算完畢...')
+    // let user see "計算中" for better UX
+    setTimeout(()=>{
+      let ans = undefined;
+      solve(chars, nums, new Map())
+      output(ans)
 
-    function solve(chars, nums, c2n) {
-      if(ans !== undefined) return
-      if(chars.length === 0) {
-        if(check(c2n)) {
-          ans = c2n
-        }
-      } else {
-        for(const num of nums) {
-          const char = chars[0]
-          if(num === 0 && heads.has(char)) continue
-          const c2nClone = new Map(c2n)
-          c2nClone.set(char, num)
-          solve(
-            chars.filter(c => c !== char),
-            nums.filter(n => n !== num),
-            c2nClone,
-          )
+      function solve(chars, nums, c2n) {
+        if(ans !== undefined) return
+        if(chars.length === 0) {
+          if(check(c2n)) {
+            ans = c2n
+          }
+        } else {
+          for(const num of nums) {
+            const char = chars[0]
+            if(num === 0 && heads.has(char)) continue
+            const c2nClone = new Map(c2n)
+            c2nClone.set(char, num)
+            solve(
+              chars.filter(c => c !== char),
+              nums.filter(n => n !== num),
+              c2nClone,
+            )
+          }
         }
       }
-    }
+    }, 100)
   }
 
   function parseInput(domId) {
@@ -95,8 +97,11 @@
     function toNum(chars) {
       return chars.map(c=>c2n.get(c)).join('')
     }
-    if(c2n === undefined) {
-      ans.textContent = "no answer"
+
+    if(typeof c2n === "string") {
+      ans.innerText = c2n
+    } else if(c2n === undefined) {
+      ans.innerText = "no answer"
     } else {
       let output = ""
       c2n.forEach((v, k) => {
@@ -113,11 +118,7 @@
 
   function check(c2n){
     // 最前面的數字不可以是零
-    const firstN = [
-      c2n.get(augend[0]),
-      c2n.get(addend[0]),
-      c2n.get(sum[0]),
-    ]
+    const firstN = [augend, addend, sum].map(x => c2n.get(x[0]))
     if(firstN.some(n => n === 0)) return false
 
     // 字母不同數字一定不同
@@ -142,6 +143,7 @@
       if(sMod10 !== ns) return false
     }
 
+    // 沒有字母可以代表 carry 的 1 了
     if (carry !== 0) return false
 
     // 都通過了

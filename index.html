@@ -121,7 +121,7 @@
     if(firstN.some(n => n === 0)) return false
 
     // 字母不同數字一定不同
-    if([...c2n.keys()].length !== new Set(c2n.values()).size) return false
+    if(c2n.size !== new Set(c2n.values()).size) return false
 
     // 一個字母代表一個數字
     const chars = [...new Set(augend.concat(addend).concat(sum))]

@@ -43,20 +43,21 @@
 <script>
   document.getElementById("cal").addEventListener('click', cal)
   function cal() {
-    let getAns = false
     const augend = parseInput('augend')
     const addend = parseInput('addend')
     const sum = parseInput('sum')
     const heads = new Set([augend[0], addend[0], sum[0]])
     const chars = [...new Set(augend.concat(addend).concat(sum))]
     const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
+    let ans = undefined;
+    solve(chars, nums, new Map())
+    output(ans, augend, addend, sum)
 
-    function recursive(chars, nums, c2n) {
-      if(getAns) return
+    function solve(chars, nums, c2n) {
+      if(ans !== undefined) return
       if(chars.length === 0) {
         if(check(augend, addend, sum, c2n)) {
-          getAns = true
-          return output(c2n, augend, addend, sum)
+          ans = c2n
         }
       } else {
         for(const num of nums) {
@@ -64,7 +65,7 @@
           if(num === 0 && heads.has(char)) continue
           const c2nClone = new Map(c2n)
           c2nClone.set(char, num)
-          recursive(
+          solve(
             chars.filter(c => c !== char),
             nums.filter(n => n !== num),
             c2nClone,
@@ -72,8 +73,6 @@
         }
       }
     }
-
-    recursive(chars, nums, new Map())
   }
 
   function parseInput(domId) {
@@ -95,7 +94,7 @@
       // get rid of last ', '
       output = output.substring(0, output.length - 2)
 
-      output += '<br/><br/>'
+      output += '<br/>'
       output += `${toNum(augend)} + ${toNum(addend)} = ${toNum(sum)}`
       ans.innerHTML = output.toString()
     }

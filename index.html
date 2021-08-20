@@ -42,22 +42,30 @@
 <div id="ans"></div>
 
 <script>
+  let augend = parseInput('augend')
+  let addend = parseInput('addend')
+  let sum = parseInput('sum')
+  output(new Map(Object.entries({s:9, e:5, n:6, d:7, m:1, o:0, r:8, y:2})), augend, addend, sum)
+
   document.getElementById("cal").addEventListener('click', cal)
+
   function cal() {
-    const augend = parseInput('augend')
-    const addend = parseInput('addend')
-    const sum = parseInput('sum')
+    console.log('計算中...')
+    augend = parseInput('augend')
+    addend = parseInput('addend')
+    sum = parseInput('sum')
     const heads = new Set([augend[0], addend[0], sum[0]])
     const chars = [...new Set(augend.concat(addend).concat(sum))]
     const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
     let ans = undefined;
     solve(chars, nums, new Map())
-    output(ans, augend, addend, sum)
+    output(ans)
+    console.log('計算完畢...')
 
     function solve(chars, nums, c2n) {
       if(ans !== undefined) return
       if(chars.length === 0) {
-        if(check(augend, addend, sum, c2n)) {
+        if(check(c2n)) {
           ans = c2n
         }
       } else {
@@ -80,7 +88,8 @@
     const dom = document.getElementById(domId)
     return dom.value.split('')
   }
-  function output(c2n, augend, addend, sum) {
+
+  function output(c2n) {
     const ans = document.getElementById('ans')
     function toNum(chars) {
       return chars.map(c=>c2n.get(c)).join('')
@@ -101,7 +110,7 @@
     }
   }
 
-  function check(augend, addend, sum, c2n){
+  function check(c2n){
     // 最前面的數字不可以是零
     const firstN = [
       c2n.get(augend[0]),
@@ -118,12 +127,12 @@
     if(!chars.every(c => typeof c2n.get(c) === "number")) return false
 
     // 數字帶入算式要成立
-    augend = [...augend].reverse()
-    addend = [...addend].reverse()
-    sum = [...sum].reverse()
+    const augend2 = [...augend].reverse()
+    const addend2 = [...addend].reverse()
+    const sum2 = [...sum].reverse()
     let carry = 0
-    for(const [i, cs] of sum.entries()){
-      const [cg, cd] = [augend[i], addend[i]]
+    for(const [i, cs] of sum2.entries()){
+      const [cg, cd] = [augend2[i], addend2[i]]
       const [ns, ng, nd] = [c2n.get(cs), c2n.get(cg) || 0, c2n.get(cd) || 0]
       if(ns === undefined) return false
       const s = ng + nd + carry
